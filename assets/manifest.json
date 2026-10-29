@@ -1,0 +1,278 @@
+[
+  {
+    "file": "bet_down_over.png",
+    "source": "C:\\Projects\\OnHand\\Casino3\\run\\scenes\\games\\slots\\bet_down_over.png",
+    "bytes": 4960,
+    "sha256": "8d9d359310a827ae3f5066c82352c76a19ef477f2d3a6a6f68c293534f4e1b5e"
+  },
+  {
+    "file": "bet_up_over.png",
+    "source": "C:\\Projects\\OnHand\\Casino3\\run\\scenes\\games\\slots\\bet_up_over.png",
+    "bytes": 5217,
+    "sha256": "c7c877ab9fb66c15f14fe466e5c9029d632fdab1f7ccd975f18ce1523b9773a5"
+  },
+  {
+    "file": "cash_over.png",
+    "source": "C:\\Projects\\OnHand\\Casino3\\run\\scenes\\games\\slots\\cash_over.png",
+    "bytes": 11485,
+    "sha256": "c22a2f7f32800b8bfc61a065f9830a92aa438a8bd78069966c18b16e74b37232"
+  },
+  {
+    "file": "lines_down_over.png",
+    "source": "C:\\Projects\\OnHand\\Casino3\\run\\scenes\\games\\slots\\lines_down_over.png",
+    "bytes": 5019,
+    "sha256": "552d7bfcecf34b9321fb1408b4ca791eb6bfcd8bfdd35039ce24afc0c06687b5"
+  },
+  {
+    "file": "lines_up_over.png",
+    "source": "C:\\Projects\\OnHand\\Casino3\\run\\scenes\\games\\slots\\lines_up_over.png",
+    "bytes": 5235,
+    "sha256": "7780b758364e9293a31d57dae8d4a6f5f82d3e3068b0ee234ff81b210ae869a6"
+  },
+  {
+    "file": "max_over.png",
+    "source": "C:\\Projects\\OnHand\\Casino3\\run\\scenes\\games\\slots\\max_over.png",
+    "bytes": 11392,
+    "sha256": "04b7fb3b070ecfa84071460d98f34204ebc05e5034be937aae64cbc7d4d34eb4"
+  },
+  {
+    "file": "payline_01.png",
+    "source": "C:\\Projects\\OnHand\\Casino3\\run\\scenes\\games\\slots\\payline_01.png",
+    "bytes": 9082,
+    "sha256": "eb948f80ddabf99e47ae477be20357627334bec57caa5216fd8a5ef4a76b79fd"
+  },
+  {
+    "file": "payline_02.png",
+    "source": "C:\\Projects\\OnHand\\Casino3\\run\\scenes\\games\\slots\\payline_02.png",
+    "bytes": 9102,
+    "sha256": "cebb43003b0516b429059f4d9727967ba6000626931734a0951a47b2fb4a28fd"
+  },
+  {
+    "file": "payline_03.png",
+    "source": "C:\\Projects\\OnHand\\Casino3\\run\\scenes\\games\\slots\\payline_03.png",
+    "bytes": 9108,
+    "sha256": "81019e78b2afbaa49b5d77933670855cad714e58c27d46387cefd08120ce10a0"
+  },
+  {
+    "file": "payline_04.png",
+    "source": "C:\\Projects\\OnHand\\Casino3\\run\\scenes\\games\\slots\\payline_04.png",
+    "bytes": 31014,
+    "sha256": "8db89a1906abf52d84b3c58ebd1648a03accb12630f0aedc3b9fc6dca23a1bd2"
+  },
+  {
+    "file": "payline_05.png",
+    "source": "C:\\Projects\\OnHand\\Casino3\\run\\scenes\\games\\slots\\payline_05.png",
+    "bytes": 31106,
+    "sha256": "11d7282f9e4fce78892fe889ae7f477d07f95e9c0aad01fd94c852bd5b645f8c"
+  },
+  {
+    "file": "payline_06.png",
+    "source": "C:\\Projects\\OnHand\\Casino3\\run\\scenes\\games\\slots\\payline_06.png",
+    "bytes": 52720,
+    "sha256": "471b495c1dc1570288e2a2204b7a05de7725b1d0161d53ac09ff9677d10ddd05"
+  },
+  {
+    "file": "payline_07.png",
+    "source": "C:\\Projects\\OnHand\\Casino3\\run\\scenes\\games\\slots\\payline_07.png",
+    "bytes": 52117,
+    "sha256": "03508f75418fe3adf20d13f22c9980c82ef31a3624474681dcb358e3080a46df"
+  },
+  {
+    "file": "payline_08.png",
+    "source": "C:\\Projects\\OnHand\\Casino3\\run\\scenes\\games\\slots\\payline_08.png",
+    "bytes": 12964,
+    "sha256": "89e564fca2bf72227197ee3127642874a31d59e9eb9153020ab2c83fe5b4299e"
+  },
+  {
+    "file": "payline_09.png",
+    "source": "C:\\Projects\\OnHand\\Casino3\\run\\scenes\\games\\slots\\payline_09.png",
+    "bytes": 29240,
+    "sha256": "7d20a89c3dda0e5ca9a44d013610230be99651f68296dbcf6ad1f97dcbf35343"
+  },
+  {
+    "file": "paytable_shadow.png",
+    "source": "C:\\Projects\\OnHand\\Casino3\\run\\scenes\\games\\slots\\paytable_shadow.png",
+    "bytes": 534,
+    "sha256": "1ab35d226e311a561b254b8dcdc445fc91a87946081ccf447bbcb00543b05ad1"
+  },
+  {
+    "file": "serbia_bonus0.png",
+    "source": "C:\\Projects\\OnHand\\Casino3\\run\\scenes\\games\\slots\\serbia_bonus0.png",
+    "bytes": 47026,
+    "sha256": "24df29465d30fda0393d2ed944611ec45260ad201defd97cec49cecf619e88fb"
+  },
+  {
+    "file": "serbia_bonus1.png",
+    "source": "C:\\Projects\\OnHand\\Casino3\\run\\scenes\\games\\slots\\serbia_bonus1.png",
+    "bytes": 52412,
+    "sha256": "8aaa5a89b409bfcb9c73d6382f03e5e954d2f045f2e24cab85423c2ce6d756fd"
+  },
+  {
+    "file": "serbia_bonus2.png",
+    "source": "C:\\Projects\\OnHand\\Casino3\\run\\scenes\\games\\slots\\serbia_bonus2.png",
+    "bytes": 64274,
+    "sha256": "0e25940c304e2e834e08dc30d0ae63ad34e57571b5d0ca283df624cd65f178e0"
+  },
+  {
+    "file": "serbia_bonus3.png",
+    "source": "C:\\Projects\\OnHand\\Casino3\\run\\scenes\\games\\slots\\serbia_bonus3.png",
+    "bytes": 94603,
+    "sha256": "4b38463081171ceecfacba51f78671e616f9269c42276a4e08c0502c4cf62eec"
+  },
+  {
+    "file": "serbia_symbol0.png",
+    "source": "C:\\Projects\\OnHand\\Casino3\\run\\scenes\\games\\slots\\serbia_symbol0.png",
+    "bytes": 29810,
+    "sha256": "1387c26c720e9efbeda2401f10d3584b7cb72c3e636ac7a43847dce898d5557b"
+  },
+  {
+    "file": "serbia_symbol1.png",
+    "source": "C:\\Projects\\OnHand\\Casino3\\run\\scenes\\games\\slots\\serbia_symbol1.png",
+    "bytes": 68735,
+    "sha256": "977eb2767e6536166be3bde87768f0d451be2815a867ae2ce294a91658f4eb6b"
+  },
+  {
+    "file": "serbia_symbol2.png",
+    "source": "C:\\Projects\\OnHand\\Casino3\\run\\scenes\\games\\slots\\serbia_symbol2.png",
+    "bytes": 88374,
+    "sha256": "4bc1380da39650500aa1b9c21afed058f9b710c0cbda401979fb2a231f9c616e"
+  },
+  {
+    "file": "serbia_symbol3.png",
+    "source": "C:\\Projects\\OnHand\\Casino3\\run\\scenes\\games\\slots\\serbia_symbol3.png",
+    "bytes": 81658,
+    "sha256": "e20af63ea958954467d15c8a4d2e4d91538e7071810463b1e9e0b295f0cd46ee"
+  },
+  {
+    "file": "serbia_symbol4.png",
+    "source": "C:\\Projects\\OnHand\\Casino3\\run\\scenes\\games\\slots\\serbia_symbol4.png",
+    "bytes": 88485,
+    "sha256": "d523dfa53ad2ce5086019f871d7121bb8922551f5aeb4d41d5caa2e7d8923bd4"
+  },
+  {
+    "file": "serbia_symbol5.png",
+    "source": "C:\\Projects\\OnHand\\Casino3\\run\\scenes\\games\\slots\\serbia_symbol5.png",
+    "bytes": 36881,
+    "sha256": "2d768f50e719ac4c7e4acc5c69ab4df2360549727f9825737dd686470ec2f5ec"
+  },
+  {
+    "file": "serbia_symbol6.png",
+    "source": "C:\\Projects\\OnHand\\Casino3\\run\\scenes\\games\\slots\\serbia_symbol6.png",
+    "bytes": 31489,
+    "sha256": "ab57b195c34156f68e3bd25ea68742e3a48cc4d71e9928cfb7cdfb3a7b876273"
+  },
+  {
+    "file": "serbia_symbol7.png",
+    "source": "C:\\Projects\\OnHand\\Casino3\\run\\scenes\\games\\slots\\serbia_symbol7.png",
+    "bytes": 47026,
+    "sha256": "24df29465d30fda0393d2ed944611ec45260ad201defd97cec49cecf619e88fb"
+  },
+  {
+    "file": "slots_denom0.png",
+    "source": "C:\\Projects\\OnHand\\Casino3\\run\\scenes\\games\\slots\\slots_denom0.png",
+    "bytes": 6952,
+    "sha256": "5c57923c23684830f4d99482b5d47cfa1c2dcd5067366654a74d31e244a3ef43"
+  },
+  {
+    "file": "slots_denom1.png",
+    "source": "C:\\Projects\\OnHand\\Casino3\\run\\scenes\\games\\slots\\slots_denom1.png",
+    "bytes": 7000,
+    "sha256": "0d195be704ff0f8a47994542e171f85c34f2ae5ba7def0ff353a14b9c019ec84"
+  },
+  {
+    "file": "slots_denom2.png",
+    "source": "C:\\Projects\\OnHand\\Casino3\\run\\scenes\\games\\slots\\slots_denom2.png",
+    "bytes": 6747,
+    "sha256": "7c690b29291ca0fb05dc059cbbaa8044c7338768f3436ab4fe1192b4b545ce18"
+  },
+  {
+    "file": "slots_denom3.png",
+    "source": "C:\\Projects\\OnHand\\Casino3\\run\\scenes\\games\\slots\\slots_denom3.png",
+    "bytes": 6999,
+    "sha256": "d48346ff82e9406b51636e184feef92296122731abbd4c88516dcc3d5b4613e9"
+  },
+  {
+    "file": "slots_denom4.png",
+    "source": "C:\\Projects\\OnHand\\Casino3\\run\\scenes\\games\\slots\\slots_denom4.png",
+    "bytes": 7024,
+    "sha256": "98b791414db88497326ed6705a2b70a2de18ff1999ee745778b6aa15b1ffb242"
+  },
+  {
+    "file": "slots_denom5.png",
+    "source": "C:\\Projects\\OnHand\\Casino3\\run\\scenes\\games\\slots\\slots_denom5.png",
+    "bytes": 6881,
+    "sha256": "34d4045beb039cfaaeca7726096186db542ae031ed0f5d4a1e1093677f0e1f35"
+  },
+  {
+    "file": "slots_free1.png",
+    "source": "C:\\Projects\\OnHand\\Casino3\\run\\scenes\\games\\slots\\slots_free1.png",
+    "bytes": 20053,
+    "sha256": "20f7ea289c6231bf546427bd8c346eb8f37b06c9dd7fe654dc85c85a05d73e74"
+  },
+  {
+    "file": "slots_free2.png",
+    "source": "C:\\Projects\\OnHand\\Casino3\\run\\scenes\\games\\slots\\slots_free2.png",
+    "bytes": 11681,
+    "sha256": "5f7ae91bdd7016b6675fcaad0241c9c1c6d0d5247860be7f565b8be2b619a42b"
+  },
+  {
+    "file": "slots_stop.png",
+    "source": "C:\\Projects\\OnHand\\Casino3\\run\\scenes\\games\\slots\\slots_stop.png",
+    "bytes": 13379,
+    "sha256": "aed92d2f5e49164cbed10ddcc33896c717822e6c8faf786a08d51512a0501546"
+  },
+  {
+    "file": "slots_stop_over.png",
+    "source": "C:\\Projects\\OnHand\\Casino3\\run\\scenes\\games\\slots\\slots_stop_over.png",
+    "bytes": 13438,
+    "sha256": "72607c1682b37eaf52543378821168d2eb17d71c46091db1ff43fbecf769e0b5"
+  },
+  {
+    "file": "slots_ui.png",
+    "source": "C:\\Projects\\OnHand\\Casino3\\run\\scenes\\games\\slots\\slots_ui.png",
+    "bytes": 164514,
+    "sha256": "c25f4dcd4d95bf11c75191a2bac992270e4275ead909b7a87bbe8d162a892bb2"
+  },
+  {
+    "file": "spin_over.png",
+    "source": "C:\\Projects\\OnHand\\Casino3\\run\\scenes\\games\\slots\\spin_over.png",
+    "bytes": 13136,
+    "sha256": "9488b6b00bc05e2573a272c565645c2ac7da6bb5ac39d643b6b60c93602578b3"
+  },
+  {
+    "file": "syberia_back.png",
+    "source": "C:\\Projects\\OnHand\\Casino3\\run\\scenes\\games\\slots\\syberia_back.png",
+    "bytes": 1338475,
+    "sha256": "b0195925a1e6a1aaf6995128f90ee7857292ff036086e7d7a63867c04c59378b"
+  },
+  {
+    "file": "syberia_bonus_overlay.png",
+    "source": "C:\\Projects\\OnHand\\Casino3\\run\\scenes\\games\\slots\\syberia_bonus_overlay.png",
+    "bytes": 573321,
+    "sha256": "c981a0dec8e33b73a3e2607abc92ef3c150ee7f1c85692a0c377b9b29832d5b2"
+  },
+  {
+    "file": "syberia_bonus_text.png",
+    "source": "C:\\Projects\\OnHand\\Casino3\\run\\scenes\\games\\slots\\syberia_bonus_text.png",
+    "bytes": 56714,
+    "sha256": "a3a7f86841cce6594d3572f595bc7758dd0de936b95459587d882e55f01b4ee1"
+  },
+  {
+    "file": "syberia_overlay.png",
+    "source": "C:\\Projects\\OnHand\\Casino3\\run\\scenes\\games\\slots\\syberia_overlay.png",
+    "bytes": 1325411,
+    "sha256": "5aa445d1c366a7e4d6a08306c49cd1dba03e96cae1d65c71403474f0fb108da9"
+  },
+  {
+    "file": "table_over.png",
+    "source": "C:\\Projects\\OnHand\\Casino3\\run\\scenes\\games\\slots\\table_over.png",
+    "bytes": 13961,
+    "sha256": "da1ecc7a2ba1323af5a58d492e00d7b6bcbdd74dc268327d5981fa09aa5e3991"
+  },
+  {
+    "file": "guide_slots.xml",
+    "source": "C:\\Projects\\OnHand\\Casino3\\run\\scenes\\ui\\guide\\guide_slots.xml",
+    "bytes": 1124,
+    "sha256": "6aafbba00f2ce30edd14efb840e2330b3e014e6c0471ebbcd16e24caee67b6ee"
+  }
+]
