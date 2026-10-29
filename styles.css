@@ -6,3 +6,11 @@
 
 /* Keep cabinet text proportional when viewport height limits the game width. */
 @supports(width:1cqw){main{container-type:inline-size}output{font-size:clamp(8px,2cqw,27px)}#bonus-message{font-size:clamp(8px,1.5cqw,21px)}#bonus-board button{font-size:clamp(9px,1.6cqw,22px)}#bonus-done{font-size:clamp(8px,1.4cqw,19px)}}
+
+/* Fit the playable cabinet crop to the mobile viewport on first load. */
+@media(pointer:coarse) and (max-width:1024px){
+  body{display:block;padding-top:0}
+  main{width:min(1010px,100%,calc(100vh * 1010/768));width:min(1010px,100%,calc(100dvh * 1010/768));overflow:hidden}
+  #cabinet{width:calc(100% * 1366/1010);margin-left:calc(-100% * 178/1010)}
+  @supports(width:1cqw){#cabinet{container-type:inline-size}}
+}
