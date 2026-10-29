@@ -75,9 +75,10 @@
       renderMeters();
       if(payout.remaining===0){
         clearInterval(payoutTimer);payoutTimer=null;payout=null;
-        stopSound("pay");update();complete();
+        // Finish the current playback, including short wins that end before its first loop.
+        sounds.pay.loop=false;update();complete();
       }
-    },8);
+    },200);
   }
 
   // Saved files are a trust boundary; accept only this game's supported state.
