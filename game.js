@@ -182,7 +182,7 @@
         sounds.pay.loop=false;if(paySource)paySource.loop=false;
         update();complete();
       }
-    },200);
+    },credits<=10 ? 200 : credits<=20 ? 100 : 50);
   }
 
   // Saved files are a trust boundary; accept only this game's supported state.
