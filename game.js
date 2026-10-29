@@ -238,6 +238,8 @@
       renderMeters();
       if(payout.remaining===0){
         clearInterval(payoutTimer);payoutTimer=null;payout=null;
+        $("win-overlay").textContent=money(state.lastWin*state.denomination);
+        $("win-overlay").hidden=false;
         // Finish the current playback, including short wins that end before its first loop.
         sounds.pay.loop=false;if(paySource)paySource.loop=false;
         update();complete();
@@ -366,6 +368,7 @@
     if(payout||state.bonus||!$("bonus").hidden)return;
     const wager=state.lines*state.bet*state.denomination;
     if(state.balance<wager){$("message").textContent="Not enough credits. Lower your wager or denomination, or start a new game.";return;}
+    $("win-overlay").hidden=true;
     clearWins();state.balance-=wager;state.lastWin=0;spinning=true;
     const grid=rollGrid(), result=evaluate(grid,state.lines,state.bet);
     // Commit the outcome before animation so refreshing cannot replay a settled spin.
@@ -496,7 +499,7 @@
   });
   $("new-game").addEventListener("click",()=>{
     modal("New game",`<p>Replace your current balance with 1,000 credits (${money(state.denomination*1000)}) at this denomination?</p><button class="primary" id="confirm-new">Start new game</button>`);
-    $("confirm-new").addEventListener("click",()=>{change(()=>{state.balance=1000*state.denomination;state.lastWin=0;state.score=null;state.grid=rollGrid();});drawGrid(state.grid);$("dialog").close();});
+    $("confirm-new").addEventListener("click",()=>{change(()=>{state.balance=1000*state.denomination;state.lastWin=0;$("win-overlay").hidden=true;state.score=null;state.grid=rollGrid();});drawGrid(state.grid);$("dialog").close();});
   });
   $("bonus-done").addEventListener("click",()=>{if(payout)return;$("bonus").hidden=true;update();if(wins.length)startWinCycle();else $("message").textContent=`Game pays ${state.lastWin} credits · Ready to spin`;});
   $("close-dialog").addEventListener("click",()=>$("dialog").close());

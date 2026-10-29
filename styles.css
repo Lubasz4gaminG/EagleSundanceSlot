@@ -24,3 +24,7 @@
   #cabinet{width:calc(100% * 1366/1010);margin-left:calc(-100% * 178/1010)}
   @supports(width:1cqw){#cabinet{container-type:inline-size}}
 }
+
+@font-face{font-family:"Ice and Snow";src:url("assets/IceAndsnowNormal-2ve8.ttf") format("truetype");font-weight:400;font-style:normal;font-display:swap}
+#win-overlay{position:absolute;left:16.47%;top:45.445%;width:66.98%;transform:translateY(-50%);z-index:8;padding:1.5% 1%;background:#000b;color:#b5eaff;text-align:center;font:400 clamp(18px,5.7vw,78px)/1.25 "Ice and Snow",serif;text-shadow:0 2px 4px #000;white-space:nowrap;pointer-events:none}
+@supports(width:1cqw){#win-overlay{font-size:clamp(18px,5.7cqw,78px)}}
