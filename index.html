@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Siberian Wolf</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="assets/game-data.js" defer></script>
+  <script src="game.js" defer></script>
+</head>
+<body>
+<main>
+  <h1 class="sr-only">Siberian Wolf</h1>
+  <div id="cabinet" aria-label="Siberian Wolf slot machine">
+    <img class="layer background" src="assets/syberia_back.png" alt="Snowy Siberian mountains">
+    <div id="reels" aria-label="Reels"></div>
+    <img class="layer frame" src="assets/syberia_overlay.png" alt="">
+    <div id="paylines" aria-hidden="true"></div>
+    <div id="markers" aria-label="Active paylines"></div>
+    <img class="bonus-caption" src="assets/syberia_bonus_text.png" alt="Three snowflake symbols trigger the bonus game">
+    <img class="layer controls-art" src="assets/slots_ui.png" alt="">
+    <output id="bank" aria-label="Balance"></output>
+    <output id="credits" aria-label="Credits"></output>
+    <output id="lines" aria-label="Selected lines"></output>
+    <output id="bet" aria-label="Bet per line"></output>
+    <output id="total" aria-label="Total bet"></output>
+    <output id="win" aria-label="Win"></output>
+    <button class="hotspot" id="paytable" aria-label="Pay table"></button>
+    <button class="hotspot" id="lines-up" aria-label="Increase paylines"></button>
+    <button class="hotspot" id="lines-down" aria-label="Decrease paylines"></button>
+    <button class="hotspot" id="bet-up" aria-label="Increase bet per line"></button>
+    <button class="hotspot" id="bet-down" aria-label="Decrease bet per line"></button>
+    <button class="hotspot" id="max" aria-label="Bet max"></button>
+    <button class="hotspot" id="cash" aria-label="Cash out"></button>
+    <button class="hotspot" id="spin" aria-label="Spin"></button>
+    <button id="denomination" aria-label="Change denomination"><img id="denom-art" alt=""></button>
+    <section id="bonus" hidden aria-label="Snowflake bonus">
+      <img class="layer" src="assets/syberia_bonus_overlay.png" alt="">
+      <h2>SNOWFLAKE BONUS</h2>
+      <p id="bonus-message">Pick snowflakes until you find COLLECT.</p>
+      <div id="bonus-board"></div>
+      <button id="bonus-done" hidden>Collect &amp; return to reels</button>
+    </section>
+  </div>
+  <div class="status-bar"><p id="message" role="status" aria-live="polite">Select your wager, then spin.</p><span id="cost"></span></div>
+  <footer><span>Play credits only</span><button id="help">How to play</button><button id="new-game">New game</button><span>Space to spin</span></footer>
+</main>
+<dialog id="dialog"><div class="dialog-top"><h2 id="dialog-title"></h2><button id="close-dialog" aria-label="Close">×</button></div><div id="dialog-body"></div></dialog>
+</body>
+</html>
