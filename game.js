@@ -16,21 +16,46 @@
     clip.volume = name === "spin" ? 0.35 : 0.55;
     return [name,clip];
   }));
+  let payContext=null, payBuffer=null, payGain=null, paySource=null;
+  try {
+    const BufferedAudio=window.AudioContext || window.webkitAudioContext;
+    if(BufferedAudio){
+      payContext=new BufferedAudio();
+      payGain=payContext.createGain();payGain.gain.value=sounds.pay.volume;
+      payGain.connect(payContext.destination);
+      const bytes=Uint8Array.from(atob(WOLF_PAY_AUDIO),c=>c.charCodeAt(0));
+      payContext.decodeAudioData(bytes.buffer).then(buffer=>{payBuffer=buffer;}).catch(()=>{});
+    }
+  } catch (_) { /* Keep the original audio player if buffered playback is unavailable. */ }
+
+  function unlockAudio() {
+    audioUnlocked=true;
+    if(payContext && payContext.state==="suspended")payContext.resume().catch(()=>{});
+  }
 
   function playSound(name, loop=false) {
     if (!audioUnlocked || !state.sound || document.hidden) return;
     const clip = sounds[name];
+    if(name==="pay" && payBuffer && payContext.state==="running"){
+      stopSound(name);
+      const source=payContext.createBufferSource();
+      source.buffer=payBuffer;source.loop=loop;source.connect(payGain);
+      source.onended=()=>{source.disconnect();if(paySource===source)paySource=null;};
+      paySource=source;source.start();
+      return;
+    }
     clip.pause(); clip.currentTime = 0; clip.loop = loop;
     const playing = clip.play();
     if (playing) playing.catch(()=>{}); // Playback restrictions must not interrupt the game.
   }
   function stopSound(name) {
+    if(name==="pay" && paySource){paySource.stop();paySource.disconnect();paySource=null;}
     const clip = sounds[name];
     clip.pause(); clip.currentTime = 0; clip.loop = false;
   }
   function stopAllSounds() { Object.keys(sounds).forEach(stopSound); }
-  document.addEventListener("pointerdown",()=>{audioUnlocked=true;},{capture:true});
-  document.addEventListener("keydown",()=>{audioUnlocked=true;},{capture:true});
+  document.addEventListener("pointerdown",unlockAudio,{capture:true});
+  document.addEventListener("keydown",unlockAudio,{capture:true});
   document.addEventListener("visibilitychange",()=>{
     if(document.hidden)stopAllSounds();
     else if(payout)playSound("pay",true);
@@ -76,7 +101,8 @@
       if(payout.remaining===0){
         clearInterval(payoutTimer);payoutTimer=null;payout=null;
         // Finish the current playback, including short wins that end before its first loop.
-        sounds.pay.loop=false;update();complete();
+        sounds.pay.loop=false;if(paySource)paySource.loop=false;
+        update();complete();
       }
     },200);
   }
