@@ -18,32 +18,46 @@
     clip.volume = name === "spin" ? 0.35 : 0.55;
     return [name,clip];
   }));
-  let payContext=null, payBuffer=null, payGain=null, paySource=null;
+  let payContext=null, payBuffer=null, stopBuffer=null, payGain=null, paySource=null;
+  const stopSources=new Set();
   try {
     const BufferedAudio=window.AudioContext || window.webkitAudioContext;
     if(BufferedAudio){
       payContext=new BufferedAudio();
       payGain=payContext.createGain();payGain.gain.value=sounds.pay.volume;
       payGain.connect(payContext.destination);
-      const bytes=Uint8Array.from(atob(WOLF_PAY_AUDIO),c=>c.charCodeAt(0));
-      payContext.decodeAudioData(bytes.buffer).then(buffer=>{payBuffer=buffer;}).catch(()=>{});
+      function pcmBuffer(encoded) {
+        const bytes=Uint8Array.from(atob(encoded),c=>c.charCodeAt(0));
+        const samples=new DataView(bytes.buffer),frames=bytes.length/4;
+        const buffer=payContext.createBuffer(2,frames,44100);
+        for(let channel=0;channel<2;channel++){
+          const output=buffer.getChannelData(channel);
+          for(let frame=0;frame<frames;frame++)output[frame]=samples.getInt16(frame*4+channel*2,true)/32768;
+        }
+        return buffer;
+      }
+      payBuffer=pcmBuffer(WOLF_PAY_AUDIO);
+      stopBuffer=pcmBuffer(WOLF_STOP_AUDIO);
     }
   } catch (_) { /* Keep the original audio player if buffered playback is unavailable. */ }
 
   function unlockAudio() {
     audioUnlocked=true;
-    if(payContext && payContext.state==="suspended")payContext.resume().catch(()=>{});
+    if(payContext && payContext.state!=="running" && payContext.state!=="closed")payContext.resume().catch(()=>{});
   }
 
   function playSound(name, loop=false) {
     if (!audioUnlocked || !state.sound || document.hidden) return;
     const clip = sounds[name];
-    if(name==="pay" && payBuffer && payContext.state==="running"){
-      stopSound(name);
+    const buffer=name==="pay" ? payBuffer : name==="stop" ? stopBuffer : null;
+    if(buffer && payContext.state!=="closed"){
+      if(name==="pay")stopSound(name);
       const source=payContext.createBufferSource();
-      source.buffer=payBuffer;source.loop=loop;source.connect(payGain);
-      source.onended=()=>{source.disconnect();if(paySource===source)paySource=null;};
-      paySource=source;source.start();
+      source.buffer=buffer;source.loop=loop;source.connect(payGain);
+      source.onended=()=>{source.disconnect();stopSources.delete(source);if(paySource===source)paySource=null;};
+      if(name==="pay")paySource=source;
+      else stopSources.add(source);
+      source.start();
       return;
     }
     clip.pause(); clip.currentTime = 0; clip.loop = loop;
@@ -52,11 +66,17 @@
   }
   function stopSound(name) {
     if(name==="pay" && paySource){paySource.stop();paySource.disconnect();paySource=null;}
+    if(name==="stop"){
+      for(const source of stopSources){source.stop();source.disconnect();}
+      stopSources.clear();
+    }
     const clip = sounds[name];
     clip.pause(); clip.currentTime = 0; clip.loop = false;
   }
   function stopAllSounds() { Object.keys(sounds).forEach(stopSound); }
   document.addEventListener("pointerdown",unlockAudio,{capture:true});
+  document.addEventListener("touchend",unlockAudio,{capture:true,passive:true});
+  document.addEventListener("click",unlockAudio,{capture:true});
   document.addEventListener("keydown",unlockAudio,{capture:true});
   document.addEventListener("visibilitychange",()=>{
     if(document.hidden)stopAllSounds();
