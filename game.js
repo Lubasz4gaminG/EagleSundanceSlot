@@ -3,12 +3,14 @@
   const $ = id => document.getElementById(id);
   const DATA = WOLF_DATA;
   const KEY = "siberian-wolf.v1";
+  const LEADERBOARD_URL = "https://siberian-wolf-leaderboard.lubaszj.workers.dev";
   const names = ["Diamond", "Howling wolf", "White tiger", "White wolf", "Paw print", "Crane", "Moon", "Snowflake"];
   const lampY = [358.5,234.5,478.5,145.5,570.5,188.5,524,313,402.5];
   const controls = ["lines-up","lines-down","bet-up","bet-down","max","cash","denomination","new-game"];
-  let state = {balance:5000, denomination:5, lines:9, bet:1, lastWin:0, grid:null, bonus:null, sound:true};
+  let state = {balance:5000, denomination:5, lines:9, bet:1, lastWin:0, grid:null, bonus:null, sound:true, score:null};
   let spinning = false, timers = [], animation = null, lineTimer = null, wins = [], lineIndex = 0;
   let payout = null, payoutTimer = null;
+  let leaderboardBusy=false, leaderboardRevision=0;
   let audioUnlocked = false;
   const sounds = Object.fromEntries(["click","spin","stop","pay","clear","snowflake"].map(name=>{
     const clip = new Audio(`assets/${name}.ogg`);
@@ -80,6 +82,62 @@
   function denominationLabel(cents) { return cents < 100 ? `${cents}¢` : `$${cents / 100}`; }
   function save() { try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (_) { /* Browser storage may be unavailable. */ } }
 
+  async function leaderboardRequest(method="GET", score) {
+    if(!LEADERBOARD_URL)throw new Error("Leaderboard unavailable.");
+    const response=await fetch(`${LEADERBOARD_URL}/v1/scores`,{
+      method, mode:"cors", cache:"no-store", signal:AbortSignal.timeout(5000),
+      ...(score ? {headers:{"Content-Type":"application/json"},body:JSON.stringify(score)} : {})
+    });
+    if(!response.ok)throw new Error("Leaderboard unavailable.");
+    const data=await response.json();
+    if(!Array.isArray(data.scores) || data.scores.length>3 || data.scores.some(entry=>
+      typeof entry.id!=="string" || !/^[A-Z0-9]{3}$/.test(entry.initials) ||
+      !Number.isSafeInteger(entry.cents) || entry.cents<=0))throw new Error("Invalid leaderboard.");
+    return data;
+  }
+  function renderLeaderboard(scores) {
+    $("leaderboard-scores").replaceChildren();
+    for(let i=0;i<3;i++){
+      const entry=scores[i],row=document.createElement("li");
+      for(const text of [String(i+1),entry ? entry.initials : "— — —",entry ? money(entry.cents) : "—"]){
+        const span=document.createElement("span");span.textContent=text;row.append(span);
+      }
+      $("leaderboard-scores").append(row);
+    }
+  }
+  async function refreshLeaderboard() {
+    const revision=++leaderboardRevision;
+    $("leaderboard-status").textContent="Loading shared scores…";
+    try {
+      const data=await leaderboardRequest();
+      if(revision!==leaderboardRevision)return;
+      renderLeaderboard(data.scores);$("leaderboard-status").textContent="Highest single-spin payouts · Includes bonus wins";
+    } catch {
+      if(revision===leaderboardRevision)$("leaderboard-status").textContent="Shared scores unavailable. Refresh to try again.";
+    }
+  }
+  async function checkHighScore() {
+    if(leaderboardBusy || spinning || payout || state.bonus || !state.score)return;
+    if(!state.score.cents){state.score=null;save();return;}
+    leaderboardBusy=true;++leaderboardRevision;update();
+    $("leaderboard-status").textContent="Checking your payout…";
+    try {
+      const data=await leaderboardRequest();renderLeaderboard(data.scores);
+      if(data.scores.some(entry=>entry.id===state.score.id) ||
+         (data.scores.length===3 && state.score.cents<=data.scores[2].cents)){
+        state.score=null;save();$("leaderboard-status").textContent="Highest single-spin payouts · Includes bonus wins";
+      } else {
+        $("score-amount").textContent=money(state.score.cents);
+        $("score-initials").value=state.score.initials;
+        $("score-error").textContent="";
+        $("score-dialog").showModal();$("score-initials").focus();
+        $("leaderboard-status").textContent="Top-three payout! Enter your initials.";
+      }
+    } catch {
+      $("leaderboard-status").textContent="Your payout could not be checked. Refresh to retry before your next spin.";
+    } finally {leaderboardBusy=false;update();if($("score-dialog").open)$("score-initials").focus();}
+  }
+
   function renderMeters() {
     const balance=payout ? payout.balance : state.balance;
     $("bank").textContent=money(balance);
@@ -119,6 +177,12 @@
       state = {...state, balance:s.balance, denomination:s.denomination, lines:s.lines, bet:s.bet,
         lastWin:Number.isSafeInteger(s.lastWin) && s.lastWin >= 0 ? s.lastWin : 0, grid:validGrid ? s.grid : null,
         sound:typeof s.sound === "boolean" ? s.sound : true};
+      if(s.score && typeof s.score.id==="string" &&
+          /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(s.score.id) &&
+          Number.isSafeInteger(s.score.cents) && s.score.cents>=0 && s.score.cents<=1801350000 &&
+          typeof s.score.initials==="string" && /^(?:[A-Z0-9]{3})?$/.test(s.score.initials)) {
+        state.score={id:s.score.id,cents:s.score.cents,initials:s.score.initials};
+      }
       const b = s.bonus;
       if (b && Array.isArray(b.values) && b.values.length === 14 &&
           [...b.values].sort((a,c)=>a-c).join() === [...DATA.bonusValues].sort((a,c)=>a-c).join() &&
@@ -176,10 +240,15 @@
     $("denom-art").alt=denominationLabel(state.denomination);
     $("denomination").title=`${denominationLabel(state.denomination)} per credit — click to change`;
     $("cost").textContent=`${money(state.bet*state.denomination)} per line · ${money(state.lines*state.bet*state.denomination)} per spin`;
-    const locked=spinning || !!payout || !!state.bonus || !$("bonus").hidden;
+    const scoreLocked=leaderboardBusy || $("score-dialog").open;
+    const locked=spinning || !!payout || !!state.bonus || !$("bonus").hidden || scoreLocked;
     controls.forEach(id=>$(id).disabled=locked);
-    $("spin").disabled=!!payout || !!state.bonus || !$("bonus").hidden;
-    $("bonus-done").disabled=!!payout;
+    $("spin").disabled=!!payout || !!state.bonus || !$("bonus").hidden || scoreLocked;
+    $("bonus-done").disabled=!!payout || scoreLocked;
+    $("leaderboard-refresh").disabled=scoreLocked;
+    $("score-submit").disabled=leaderboardBusy;
+    $("score-skip").disabled=leaderboardBusy;
+    $("score-initials").disabled=leaderboardBusy;
     $("spin").classList.toggle("stopping",spinning);
     $("spin").setAttribute("aria-label",spinning ? "Stop reels" : "Spin");
     $("lines-up").disabled=locked||state.lines===9; $("lines-down").disabled=locked||state.lines===1;
@@ -205,12 +274,12 @@
     if(wins.length>1)lineTimer=setInterval(()=>{if(!$("dialog").open&&!document.hidden){lineIndex++;showWin();}},1800);
   }
   function change(fn) {
-    if(spinning||payout||state.bonus||!$("bonus").hidden)return;
+    if(spinning||payout||state.bonus||!$("bonus").hidden||leaderboardBusy||$("score-dialog").open)return;
     clearWins();fn();save();update();$("message").textContent=`Play ${state.lines*state.bet} credits. Good luck!`;
   }
 
   function spin() {
-    if($("dialog").open)return;
+    if($("dialog").open||$("score-dialog").open||leaderboardBusy)return;
     if(spinning){finishSpin();return;}
     if(payout||state.bonus||!$("bonus").hidden)return;
     const wager=state.lines*state.bet*state.denomination;
@@ -221,6 +290,7 @@
     state.grid=grid;state.balance+=result.total*state.denomination;
     state.lastWin=result.total;
     if(result.bonus)state.bonus=newBonus();
+    state.score=result.total || result.bonus ? {id:crypto.randomUUID(),cents:result.total*state.denomination,initials:""} : null;
     save();
     // Hold the credited result until all reels stop visually.
     $("bank").textContent=money(state.balance-result.total*state.denomination);
@@ -255,8 +325,11 @@
     }
     countPayout(outcome.total,()=>{
       if(state.bonus){playSound("clear");showBonus();$("message").textContent="Three snowflake reels — bonus game!";}
-      else if(wins.length)startWinCycle();
-      else $("message").textContent="Game over · Select your wager and spin again.";
+      else {
+        if(wins.length)startWinCycle();
+        else $("message").textContent="Game over · Select your wager and spin again.";
+        checkHighScore();
+      }
     });
   }
   function newBonus() {
@@ -283,13 +356,15 @@
     if(value===0){
       const multiplier=b.picks.length===1 ? b.values.reduce((s,n)=>s+n,0) : b.picks.reduce((s,i)=>s+b.values[i],0);
       const award=multiplier*b.bet;
-      state.balance+=award*b.denomination;state.lastWin+=award;state.bonus=null;save();
+      state.balance+=award*b.denomination;state.lastWin+=award;state.bonus=null;
+      state.score=state.score || {id:crypto.randomUUID(),cents:(state.lastWin-award)*b.denomination,initials:""};
+      state.score.cents+=award*b.denomination;save();
       button.textContent="COLLECT";
       [...$("bonus-board").children].forEach((choice,i)=>{choice.disabled=true;if(!choice.classList.contains("revealed"))choice.textContent=b.values[i] ? `+${b.values[i]*b.bet}` : "COLLECT";});
       $("bonus-message").textContent=`Bonus pays ${award} credits${b.picks.length===1 ? " · First-pick COLLECT awards the whole board!" : ""}`;
       $("bonus-done").hidden=false;
       // Keep wagering locked until the player leaves the result screen.
-      countPayout(award,()=>{});
+      countPayout(award,checkHighScore);
     }else{
       playSound("snowflake");
       button.textContent=`+${value*b.bet}`;
@@ -332,11 +407,40 @@
   });
   $("new-game").addEventListener("click",()=>{
     modal("New game",`<p>Replace your current balance with 1,000 credits (${money(state.denomination*1000)}) at this denomination?</p><button class="primary" id="confirm-new">Start new game</button>`);
-    $("confirm-new").addEventListener("click",()=>{change(()=>{state.balance=1000*state.denomination;state.lastWin=0;state.grid=rollGrid();});drawGrid(state.grid);$("dialog").close();});
+    $("confirm-new").addEventListener("click",()=>{change(()=>{state.balance=1000*state.denomination;state.lastWin=0;state.score=null;state.grid=rollGrid();});drawGrid(state.grid);$("dialog").close();});
   });
   $("bonus-done").addEventListener("click",()=>{if(payout)return;$("bonus").hidden=true;update();if(wins.length)startWinCycle();else $("message").textContent=`Game pays ${state.lastWin} credits · Ready to spin`;});
   $("close-dialog").addEventListener("click",()=>$("dialog").close());
-  document.addEventListener("keydown",event=>{if(event.code==="Space"&&!event.repeat&&!$("dialog").open&&$("bonus").hidden&&!["BUTTON","INPUT","SELECT","TEXTAREA"].includes(document.activeElement.tagName)){event.preventDefault();spin();}});
+  $("leaderboard-refresh").addEventListener("click",()=>{
+    if(state.score && !spinning && !payout && !state.bonus)checkHighScore();else refreshLeaderboard();
+  });
+  $("score-initials").addEventListener("input",()=>{
+    $("score-initials").value=$("score-initials").value.toUpperCase().replace(/[^A-Z0-9]/g,"").slice(0,3);
+  });
+  $("score-form").addEventListener("submit",async event=>{
+    event.preventDefault();
+    if(leaderboardBusy || !state.score || !$("score-form").reportValidity())return;
+    state.score.initials=$("score-initials").value;save();
+    leaderboardBusy=true;++leaderboardRevision;update();$("score-error").textContent="Saving…";
+    try {
+      const data=await leaderboardRequest("POST",state.score);renderLeaderboard(data.scores);
+      const rank=data.scores.findIndex(entry=>entry.id===state.score.id)+1;
+      const initials=state.score.initials;state.score=null;save();$("score-dialog").close();
+      $("leaderboard-status").textContent=rank ? `${initials} placed #${rank}!` : "Another payout moved ahead. The board has been updated.";
+    } catch {$("score-error").textContent="Could not save. Try again; your payout will not be entered twice.";}
+    finally {leaderboardBusy=false;update();}
+  });
+  function skipHighScore() {
+    if(leaderboardBusy)return;
+    state.score=null;save();$("score-dialog").close();
+    $("leaderboard-status").textContent="Score entry skipped.";update();
+  }
+  $("score-skip").addEventListener("click",skipHighScore);
+  $("score-dialog").addEventListener("cancel",event=>{event.preventDefault();skipHighScore();});
+  $("score-dialog").addEventListener("close",update);
+  document.addEventListener("keydown",event=>{if(event.code==="Space"&&!event.repeat&&!$("dialog").open&&!$("score-dialog").open&&$("bonus").hidden&&!["BUTTON","INPUT","SELECT","TEXTAREA"].includes(document.activeElement.tagName)){event.preventDefault();spin();}});
   load();createReels();if(!state.grid)state.grid=rollGrid();drawGrid(state.grid);update();
   if(state.bonus)showBonus();save();
+  renderLeaderboard([]);
+  if(state.score && !state.bonus)checkHighScore();else refreshLeaderboard();
 })();

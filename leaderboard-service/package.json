@@ -1,0 +1,13 @@
+{
+  "name": "siberian-wolf-leaderboard",
+  "private": true,
+  "scripts": {
+    "test": "node --test test.cjs",
+    "validate": "wrangler deploy --dry-run",
+    "deploy": "wrangler deploy"
+  },
+  "devDependencies": {
+    "miniflare": "5.20260916.0-alpha",
+    "wrangler": "4.133.0"
+  }
+}

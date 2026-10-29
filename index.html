@@ -44,8 +44,23 @@
     </section>
   </div>
   <div class="status-bar"><p id="message" role="status" aria-live="polite">Select your wager, then spin.</p><span id="cost"></span></div>
+  <section id="leaderboard" aria-labelledby="leaderboard-title">
+    <div class="leaderboard-heading"><h2 id="leaderboard-title">TOP 3 PAYOUTS</h2><button id="leaderboard-refresh" type="button">Refresh</button></div>
+    <ol id="leaderboard-scores" aria-label="Highest dollar payouts"></ol>
+    <p id="leaderboard-status" role="status" aria-live="polite">Loading shared scores…</p>
+  </section>
   <footer><span>Play credits only</span><button id="sound" aria-pressed="true">Sound: on</button><button id="help">How to play</button><button id="new-game">New game</button><span>Space to spin</span></footer>
 </main>
 <dialog id="dialog"><div class="dialog-top"><h2 id="dialog-title"></h2><button id="close-dialog" aria-label="Close">×</button></div><div id="dialog-body"></div></dialog>
+<dialog id="score-dialog" aria-labelledby="score-title">
+  <h2 id="score-title">HIGH PAYOUT!</h2>
+  <p>Your <strong id="score-amount"></strong> payout qualifies for the top three.</p>
+  <form id="score-form">
+    <label for="score-initials">Enter 3 letters or numbers</label>
+    <input id="score-initials" name="initials" minlength="3" maxlength="3" pattern="[A-Z0-9]{3}" required autocomplete="off" autocapitalize="characters" spellcheck="false" aria-describedby="score-error">
+    <p id="score-error" role="status" aria-live="polite"></p>
+    <div class="score-actions"><button class="primary" id="score-submit" type="submit">Save initials</button><button id="score-skip" type="button">Skip</button></div>
+  </form>
+</dialog>
 </body>
 </html>

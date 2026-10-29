@@ -1,0 +1,13 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "siberian-wolf-leaderboard",
+  "main": "worker.mjs",
+  "compatibility_date": "2026-09-17",
+  "workers_dev": true,
+  "preview_urls": false,
+  "durable_objects": {
+    "bindings": [{"name":"SLOT_LEADERBOARD", "class_name":"SlotLeaderboard"}]
+  },
+  "migrations": [{"tag":"v1", "new_sqlite_classes":["SlotLeaderboard"]}],
+  "vars": {"ALLOWED_ORIGINS":"https://lubasz4gaming.github.io,null"}
+}

@@ -2,6 +2,7 @@
 
 Open **index.html** in a modern browser. The game works offline, without an
 installer, server, account, or build step. Keep this folder and its assets together.
+The shared payout leaderboard requires an internet connection.
 
 ## Play
 
@@ -26,6 +27,12 @@ installer, server, account, or build step. Keep this folder and its assets toget
   The full award is saved before counting, so reloading retains the entire win.
 - PAY TABLE lists the recovered payouts and bonus rules. Winning lines cycle
   automatically after a spin.
+- TOP 3 PAYOUTS shows the shared highest dollar payouts, combining each spin
+  and its bonus into one entry. Qualifying players enter three letters or
+  numbers. Earlier entries win ties. Refresh reloads the shared board and can
+  retry the latest unchecked payout before another spin. Skip dismisses entry.
+  Scores are stored by the separate Cloudflare service in `leaderboard-service/`.
+  This version accepts game-reported payouts rather than server-verified spins.
 - CASH OUT displays the simulated balance. It does not pay money or remove
   credits. New game replaces the balance with 1,000 credits at the current
   denomination after confirmation.
@@ -65,8 +72,8 @@ bonus arrangement are recreated. The original random-selection code and overall
 return percentage are not reproduced or claimed. Sound uses the recovered
 `click`, `spin`, `stop`, `pay`, `clear`, and `snowflake` Ogg clips.
 
-The game uses play credits only, with no deposits, purchases, withdrawals, or
-external services. Original artwork belongs to its original creators. This is
+The game uses play credits only, with no deposits, purchases, or withdrawals.
+Cloudflare stores the shared top-three board. Original artwork belongs to its original creators. This is
 an offline personal recreation, not a publication.
 
 ## Regenerate assets
