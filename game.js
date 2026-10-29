@@ -399,7 +399,7 @@
       const awards=[2,3,4,5].map(count=>DATA.payouts.find(row=>row[0]===symbol&&row.slice(0,5).filter(s=>s!==-1).length===count)[5]);
       html+=`<tr><td><img src="assets/serbia_symbol${symbol}.png" alt="">${names[symbol]}</td>${awards.map(a=>`<td>${a.toLocaleString()}</td>`).join("")}</tr>`;
     }
-    modal("Siberian Wolf · Pay table",html+'</tbody></table><p>Awards are credits for one coin per line. Multiply by your bet per line. Matching symbols must start on the leftmost reel; only the highest award on each active line pays. There are no wild substitutions.</p><p>Snowflakes on at least three different reels trigger the bonus, anywhere in the three visible rows. Pick snowflakes for credits until COLLECT appears. Finding COLLECT first awards the entire board. Bonus values are multiplied by bet per line.</p>');
+    modal("Canadian Wolf · Pay table",html+'</tbody></table><p>Awards are credits for one coin per line. Multiply by your bet per line. Matching symbols must start on the leftmost reel; only the highest award on each active line pays. There are no wild substitutions.</p><p>Snowflakes on at least three different reels trigger the bonus, anywhere in the three visible rows. Pick snowflakes for credits until COLLECT appears. Finding COLLECT first awards the entire board. Bonus values are multiplied by bet per line.</p>');
   }
   $("sound").addEventListener("click",()=>{
     state.sound=!state.sound;save();
