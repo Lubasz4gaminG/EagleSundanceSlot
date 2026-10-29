@@ -4,7 +4,7 @@
   const DATA = WOLF_DATA;
   const KEY = "siberian-wolf.v1";
   const LEADERBOARD_URL = "https://siberian-wolf-leaderboard.lubaszj.workers.dev";
-  const names = ["Diamond", "Howling wolf", "White tiger", "White wolf", "Paw print", "Crane", "Moon", "Snowflake"];
+  const names = ["Diamond", "Howling wolf", "White Cougar", "White wolf", "Paw print", "Crane", "Moon", "Snowflake"];
   const lampY = [358.5,234.5,478.5,145.5,570.5,188.5,524,313,402.5];
   const controls = ["lines-up","lines-down","bet-up","bet-down","max","cash","denomination","new-game"];
   let state = {balance:5000, denomination:5, lines:9, bet:1, lastWin:0, grid:null, bonus:null, sound:true, score:null};
