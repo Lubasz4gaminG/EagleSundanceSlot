@@ -6,8 +6,39 @@
   const names = ["Diamond", "Howling wolf", "White tiger", "White wolf", "Paw print", "Crane", "Moon", "Snowflake"];
   const lampY = [358.5,234.5,478.5,145.5,570.5,188.5,524,313,402.5];
   const controls = ["lines-up","lines-down","bet-up","bet-down","max","cash","denomination","new-game"];
-  let state = {balance:5000, denomination:5, lines:9, bet:1, lastWin:0, grid:null, bonus:null};
+  let state = {balance:5000, denomination:5, lines:9, bet:1, lastWin:0, grid:null, bonus:null, sound:true};
   let spinning = false, timers = [], animation = null, lineTimer = null, wins = [], lineIndex = 0;
+  let audioUnlocked = false;
+  const sounds = Object.fromEntries(["click","spin","stop","pay","clear","snowflake"].map(name=>{
+    const clip = new Audio(`assets/${name}.ogg`);
+    clip.preload = "auto";
+    clip.volume = name === "spin" ? 0.35 : 0.55;
+    return [name,clip];
+  }));
+
+  function playSound(name, loop=false) {
+    if (!audioUnlocked || !state.sound || document.hidden) return;
+    const clip = sounds[name];
+    clip.pause(); clip.currentTime = 0; clip.loop = loop;
+    const playing = clip.play();
+    if (playing) playing.catch(()=>{}); // Playback restrictions must not interrupt the game.
+  }
+  function stopSound(name) {
+    const clip = sounds[name];
+    clip.pause(); clip.currentTime = 0; clip.loop = false;
+  }
+  function stopAllSounds() { Object.keys(sounds).forEach(stopSound); }
+  document.addEventListener("pointerdown",()=>{audioUnlocked=true;},{capture:true});
+  document.addEventListener("keydown",()=>{audioUnlocked=true;},{capture:true});
+  document.addEventListener("visibilitychange",()=>{
+    if(document.hidden)stopAllSounds();
+    else if(spinning)playSound("spin",true);
+  });
+  document.addEventListener("click",event=>{
+    const button=event.target.closest("button");
+    if(button && !button.disabled && !["sound","spin","max"].includes(button.id) &&
+       !button.closest("#bonus-board"))playSound("click");
+  });
 
   function randomInt(max) {
     const values = new Uint32Array(1), limit = Math.floor(4294967296 / max) * max;
@@ -32,7 +63,8 @@
       const validGrid = Array.isArray(s.grid) && s.grid.length === 5 && s.grid.every(col =>
         Array.isArray(col) && col.length === 3 && col.every(n => Number.isInteger(n) && n >= 0 && n <= 7));
       state = {...state, balance:s.balance, denomination:s.denomination, lines:s.lines, bet:s.bet,
-        lastWin:Number.isSafeInteger(s.lastWin) && s.lastWin >= 0 ? s.lastWin : 0, grid:validGrid ? s.grid : null};
+        lastWin:Number.isSafeInteger(s.lastWin) && s.lastWin >= 0 ? s.lastWin : 0, grid:validGrid ? s.grid : null,
+        sound:typeof s.sound === "boolean" ? s.sound : true};
       const b = s.bonus;
       if (b && Array.isArray(b.values) && b.values.length === 14 &&
           [...b.values].sort((a,c)=>a-c).join() === [...DATA.bonusValues].sort((a,c)=>a-c).join() &&
@@ -81,6 +113,8 @@
     }));
   }
   function update() {
+    $("sound").textContent=state.sound ? "Sound: on" : "Sound: off";
+    $("sound").setAttribute("aria-pressed",String(state.sound));
     $("bank").textContent=money(state.balance);
     $("credits").textContent=Math.floor(state.balance/state.denomination).toLocaleString("en-US");
     $("lines").textContent=state.lines; $("bet").textContent=state.bet;
@@ -142,24 +176,28 @@
     [...$("markers").children].forEach(lamp=>lamp.disabled=true);
     $("spin").classList.add("stopping");$("spin").setAttribute("aria-label","Stop reels");
     $("message").textContent="Good Luck!";
+    playSound("spin",true);
     const reels=[...$("reels").children];reels.forEach(reel=>reel.classList.add("rolling"));
     animation=setInterval(()=>{const preview=rollGrid();reels.forEach((reel,col)=>{
       if(reel.classList.contains("rolling")) [...reel.children].forEach((img,row)=>{img.src=`assets/serbia_symbol${preview[col][row]}.png`;});
     });},85);
     reels.forEach((reel,col)=>timers.push(setTimeout(()=>{
       reel.classList.remove("rolling");[...reel.children].forEach((img,row)=>{img.src=`assets/serbia_symbol${grid[col][row]}.png`;img.alt=names[grid[col][row]];});
+      playSound("stop");
     },700+col*230)));
     timers.push(setTimeout(()=>finishSpin(result),1700));
   }
   function finishSpin(result) {
     if(!spinning)return;
+    stopSound("spin");
+    if([...$("reels").children].some(reel=>reel.classList.contains("rolling")))playSound("stop");
     timers.forEach(clearTimeout);timers=[];clearInterval(animation);animation=null;
     [...$("reels").children].forEach(reel=>reel.classList.remove("rolling"));
     drawGrid(state.grid);spinning=false;
     const outcome=result||evaluate(state.grid,state.lines,state.bet);wins=outcome.wins;
     update();
-    if(state.bonus){showBonus();$("message").textContent="Three snowflake reels — bonus game!";}
-    else if(wins.length)startWinCycle();
+    if(state.bonus){playSound("clear");showBonus();$("message").textContent="Three snowflake reels — bonus game!";}
+    else if(wins.length){playSound("pay");startWinCycle();}
     else $("message").textContent="Game over · Select your wager and spin again.";
   }
   function newBonus() {
@@ -184,6 +222,7 @@
     const button=$("bonus-board").children[index],value=b.values[index];
     b.picks.push(index);button.classList.add("revealed");button.disabled=true;
     if(value===0){
+      playSound("pay");
       const multiplier=b.picks.length===1 ? b.values.reduce((s,n)=>s+n,0) : b.picks.reduce((s,i)=>s+b.values[i],0);
       const award=multiplier*b.bet;
       state.balance+=award*b.denomination;state.lastWin+=award;state.bonus=null;save();
@@ -194,6 +233,7 @@
       // Keep wagering locked until the player leaves the result screen.
       $("bank").textContent=money(state.balance);$("credits").textContent=Math.floor(state.balance/state.denomination).toLocaleString();$("win").textContent=state.lastWin.toLocaleString();
     }else{
+      playSound("snowflake");
       button.textContent=`+${value*b.bet}`;
       $("bonus-message").textContent=`Bonus ${b.picks.reduce((sum,i)=>sum+b.values[i]*b.bet,0)} credits · Keep picking`;
       save();
@@ -208,6 +248,14 @@
     }
     modal("Siberian Wolf · Pay table",html+'</tbody></table><p>Awards are credits for one coin per line. Multiply by your bet per line. Matching symbols must start on the leftmost reel; only the highest award on each active line pays. There are no wild substitutions.</p><p>Snowflakes on at least three different reels trigger the bonus, anywhere in the three visible rows. Pick snowflakes for credits until COLLECT appears. Finding COLLECT first awards the entire board. Bonus values are multiplied by bet per line.</p>');
   }
+  $("sound").addEventListener("click",()=>{
+    state.sound=!state.sound;save();
+    if(!state.sound)stopAllSounds();
+    else if(spinning)playSound("spin",true);
+    else playSound("click");
+    $("sound").textContent=state.sound ? "Sound: on" : "Sound: off";
+    $("sound").setAttribute("aria-pressed",String(state.sound));
+  });
   $("spin").addEventListener("click",spin);
   $("lines-up").addEventListener("click",()=>change(()=>state.lines++));
   $("lines-down").addEventListener("click",()=>change(()=>state.lines--));

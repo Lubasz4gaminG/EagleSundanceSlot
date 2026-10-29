@@ -8,6 +8,10 @@ installer, server, account, or build step. Keep this folder and its assets toget
 - LINES +/− selects 1–9 paylines; BET +/− selects 1–5 credits per line.
 - The numbered lamps also select lines; hover over one to preview its path.
 - SPIN or Space spins. STOP immediately reveals the already determined result.
+- Sound starts after your first click or keypress. Sound: on/off toggles the six
+  original clips for controls, spinning, reel stops, payouts, bonus entry, and
+  snowflake picks. The preference saves locally. Muting stops playing clips
+  immediately; sounds also stop while the browser tab is hidden.
 - BET MAX selects 9 lines × 5 credits and spins.
 - The coin beside CREDITS selects the six original denominations: 5¢, 25¢,
   $1, $5, $25, and $100. Changing it preserves the cash balance, including
@@ -19,13 +23,13 @@ installer, server, account, or build step. Keep this folder and its assets toget
 - CASH OUT displays the simulated balance. It does not pay money or remove
   credits. New game replaces the balance with 1,000 credits at the current
   denomination after confirmation.
-- The browser saves balance, settings, settled reels, and unfinished bonus picks
+- The browser saves balance, settings, sound preference, settled reels, and unfinished bonus picks
   locally when storage is available. Wagering locks during spins and bonuses.
 
 ## Recovered data and fidelity
 
 Artwork comes from the **Casino Mega Collection (2015)** disc, resource bundle
-15. Only Siberian Wolf (`serbia_*`, `syberia_*`) and shared video-slot controls
+15, and six original game sounds come from bundle 16. Only Siberian Wolf (`serbia_*`, `syberia_*`) and shared video-slot controls
 and paylines are included. The original guide is in `assets/guide_slots.xml`;
 `assets/manifest.json` records source paths and SHA-256 hashes.
 
@@ -52,7 +56,8 @@ This is newly written browser software using the original artwork and recovered
 tables, not the original executable. Reel-stop selection and bonus shuffling use
 unbiased browser cryptographic randomness. Animation, timing, storage, and the
 bonus arrangement are recreated. The original random-selection code and overall
-return percentage are not reproduced or claimed. There is no sound in this build.
+return percentage are not reproduced or claimed. Sound uses the recovered
+`click`, `spin`, `stop`, `pay`, `clear`, and `snowflake` Ogg clips.
 
 The game uses play credits only, with no deposits, purchases, withdrawals, or
 external services. Original artwork belongs to its original creators. This is

@@ -274,5 +274,41 @@
     "source": "C:\\Projects\\OnHand\\Casino3\\run\\scenes\\ui\\guide\\guide_slots.xml",
     "bytes": 1124,
     "sha256": "6aafbba00f2ce30edd14efb840e2330b3e014e6c0471ebbcd16e24caee67b6ee"
+  },
+  {
+    "file": "clear.ogg",
+    "source": "C:\\Projects\\OnHand\\Casino3\\run\\sounds\\clear.ogg",
+    "bytes": 13060,
+    "sha256": "7a0538929bcbfda227ca00799cdda44e5a7c870741d3e7b6381449b6e59d3660"
+  },
+  {
+    "file": "click.ogg",
+    "source": "C:\\Projects\\OnHand\\Casino3\\run\\sounds\\click.ogg",
+    "bytes": 6486,
+    "sha256": "33197d71c6cab6805680130f3bb33c30e1887711bb40890e7ea5106b05e59b77"
+  },
+  {
+    "file": "pay.ogg",
+    "source": "C:\\Projects\\OnHand\\Casino3\\run\\sounds\\pay.ogg",
+    "bytes": 10213,
+    "sha256": "f05c0bd8bdeee6fd8d32ecb9a1ddf62facbbe620b94a6b115f15a9511e73adf9"
+  },
+  {
+    "file": "snowflake.ogg",
+    "source": "C:\\Projects\\OnHand\\Casino3\\run\\sounds\\snowflake.ogg",
+    "bytes": 17952,
+    "sha256": "f6ae042e9c541cd5ec960cee00ecff040b00c842c15be1bbd3375bbe9158f019"
+  },
+  {
+    "file": "spin.ogg",
+    "source": "C:\\Projects\\OnHand\\Casino3\\run\\sounds\\spin.ogg",
+    "bytes": 9073,
+    "sha256": "6ad50728316d598084d2e6a04a3c68b3a3072f8924ee495a3f5c79539a4c0e63"
+  },
+  {
+    "file": "stop.ogg",
+    "source": "C:\\Projects\\OnHand\\Casino3\\run\\sounds\\stop.ogg",
+    "bytes": 4750,
+    "sha256": "eaad1b674325b5b80b70442d96061e2b7b51483bd58e33eb44537487df442207"
   }
 ]

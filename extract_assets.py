@@ -46,7 +46,7 @@ def installer(path):
 def streams(data):
     # Wise's raw DEFLATE streams each end with a little-endian CRC32.
     offset = 15033
-    for index in range(16):
+    for index in range(17):
         decoder = zlib.decompressobj(-15)
         position, parts, size = offset, [], 0
         while not decoder.eof:
@@ -63,7 +63,7 @@ def streams(data):
         unpacked = b''.join(parts)
         if zlib.crc32(unpacked) != struct.unpack_from('<I', data, end)[0]:
             raise ValueError(f'CRC mismatch in stream {index}')
-        if index in (12, 15):
+        if index in (12, 15, 16):
             yield index, unpacked
         offset = end + 4
 
@@ -126,7 +126,9 @@ def main():
         for source, payload in entries(data):
             lower = source.lower().replace('\\', '/')
             name = lower.rsplit('/', 1)[-1]
-            selected = ('/games/slots/' in lower and lower.count('/games/slots/') == 1
+            selected = (index == 16 and name in {'click.ogg', 'spin.ogg', 'stop.ogg',
+                                               'pay.ogg', 'clear.ogg', 'snowflake.ogg'}) or (
+                        '/games/slots/' in lower and lower.count('/games/slots/') == 1
                         and '/' not in lower.split('/games/slots/')[1]
                         and name.endswith('.png')) or name == 'guide_slots.xml'
             if not selected:
