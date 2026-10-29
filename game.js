@@ -8,6 +8,7 @@
   const controls = ["lines-up","lines-down","bet-up","bet-down","max","cash","denomination","new-game"];
   let state = {balance:5000, denomination:5, lines:9, bet:1, lastWin:0, grid:null, bonus:null, sound:true};
   let spinning = false, timers = [], animation = null, lineTimer = null, wins = [], lineIndex = 0;
+  let payout = null, payoutTimer = null;
   let audioUnlocked = false;
   const sounds = Object.fromEntries(["click","spin","stop","pay","clear","snowflake"].map(name=>{
     const clip = new Audio(`assets/${name}.ogg`);
@@ -32,6 +33,7 @@
   document.addEventListener("keydown",()=>{audioUnlocked=true;},{capture:true});
   document.addEventListener("visibilitychange",()=>{
     if(document.hidden)stopAllSounds();
+    else if(payout)playSound("pay",true);
     else if(spinning)playSound("spin",true);
   });
   document.addEventListener("click",event=>{
@@ -52,6 +54,31 @@
   function money(cents) { return (cents / 100).toLocaleString("en-US", {style:"currency",currency:"USD"}); }
   function denominationLabel(cents) { return cents < 100 ? `${cents}¢` : `$${cents / 100}`; }
   function save() { try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (_) { /* Browser storage may be unavailable. */ } }
+
+  function renderMeters() {
+    const balance=payout ? payout.balance : state.balance;
+    $("bank").textContent=money(balance);
+    $("credits").textContent=Math.floor(balance/state.denomination).toLocaleString("en-US");
+    $("win").textContent=(payout ? payout.win : state.lastWin).toLocaleString("en-US");
+  }
+  function countPayout(credits, complete) {
+    if(!credits){update();complete();return;}
+    // The full award is already saved; this count only presents that settled award.
+    payout={balance:state.balance-credits*state.denomination,
+      win:state.lastWin-credits,remaining:credits};
+    update();playSound("pay",true);
+    payoutTimer=setInterval(()=>{
+      if(document.hidden)return;
+      payout.balance+=state.denomination;
+      payout.win++;
+      payout.remaining--;
+      renderMeters();
+      if(payout.remaining===0){
+        clearInterval(payoutTimer);payoutTimer=null;payout=null;
+        stopSound("pay");update();complete();
+      }
+    },8);
+  }
 
   // Saved files are a trust boundary; accept only this game's supported state.
   function load() {
@@ -102,8 +129,8 @@
       lamp.style.top=`${(lampY[line]-20)/768*100}%`; lamp.textContent=line+1;
       lamp.setAttribute("aria-label",`Play ${line+1} paylines`);
       lamp.addEventListener("click",()=>change(()=>{state.lines=line+1;}));
-      lamp.addEventListener("mouseenter",()=>{if(!spinning&&!state.bonus)showLine(line);});
-      lamp.addEventListener("mouseleave",()=>{if(!spinning&&!state.bonus)showWin();});
+      lamp.addEventListener("mouseenter",()=>{if(!spinning&&!payout&&!state.bonus)showLine(line);});
+      lamp.addEventListener("mouseleave",()=>{if(!spinning&&!payout&&!state.bonus)showWin();});
       $("markers").append(lamp);
     }
   }
@@ -115,17 +142,17 @@
   function update() {
     $("sound").textContent=state.sound ? "Sound: on" : "Sound: off";
     $("sound").setAttribute("aria-pressed",String(state.sound));
-    $("bank").textContent=money(state.balance);
-    $("credits").textContent=Math.floor(state.balance/state.denomination).toLocaleString("en-US");
+    renderMeters();
     $("lines").textContent=state.lines; $("bet").textContent=state.bet;
-    $("total").textContent=state.lines*state.bet; $("win").textContent=state.lastWin.toLocaleString("en-US");
+    $("total").textContent=state.lines*state.bet;
     $("denom-art").src=`assets/slots_denom${DATA.denominations.indexOf(state.denomination)}.png`;
     $("denom-art").alt=denominationLabel(state.denomination);
     $("denomination").title=`${denominationLabel(state.denomination)} per credit — click to change`;
     $("cost").textContent=`${money(state.bet*state.denomination)} per line · ${money(state.lines*state.bet*state.denomination)} per spin`;
-    const locked=spinning || !!state.bonus;
+    const locked=spinning || !!payout || !!state.bonus || !$("bonus").hidden;
     controls.forEach(id=>$(id).disabled=locked);
-    $("spin").disabled=!!state.bonus;
+    $("spin").disabled=!!payout || !!state.bonus || !$("bonus").hidden;
+    $("bonus-done").disabled=!!payout;
     $("spin").classList.toggle("stopping",spinning);
     $("spin").setAttribute("aria-label",spinning ? "Stop reels" : "Spin");
     $("lines-up").disabled=locked||state.lines===9; $("lines-down").disabled=locked||state.lines===1;
@@ -151,14 +178,14 @@
     if(wins.length>1)lineTimer=setInterval(()=>{if(!$("dialog").open&&!document.hidden){lineIndex++;showWin();}},1800);
   }
   function change(fn) {
-    if(spinning||state.bonus)return;
+    if(spinning||payout||state.bonus||!$("bonus").hidden)return;
     clearWins();fn();save();update();$("message").textContent=`Play ${state.lines*state.bet} credits. Good luck!`;
   }
 
   function spin() {
     if($("dialog").open)return;
     if(spinning){finishSpin();return;}
-    if(state.bonus)return;
+    if(payout||state.bonus||!$("bonus").hidden)return;
     const wager=state.lines*state.bet*state.denomination;
     if(state.balance<wager){$("message").textContent="Not enough credits. Lower your wager or denomination, or start a new game.";return;}
     clearWins();state.balance-=wager;state.lastWin=0;spinning=true;
@@ -195,10 +222,15 @@
     [...$("reels").children].forEach(reel=>reel.classList.remove("rolling"));
     drawGrid(state.grid);spinning=false;
     const outcome=result||evaluate(state.grid,state.lines,state.bet);wins=outcome.wins;
-    update();
-    if(state.bonus){playSound("clear");showBonus();$("message").textContent="Three snowflake reels — bonus game!";}
-    else if(wins.length){playSound("pay");startWinCycle();}
-    else $("message").textContent="Game over · Select your wager and spin again.";
+    if(outcome.total){
+      showLine(wins[0].line);
+      $("message").textContent=`Game pays ${outcome.total.toLocaleString()} credits`;
+    }
+    countPayout(outcome.total,()=>{
+      if(state.bonus){playSound("clear");showBonus();$("message").textContent="Three snowflake reels — bonus game!";}
+      else if(wins.length)startWinCycle();
+      else $("message").textContent="Game over · Select your wager and spin again.";
+    });
   }
   function newBonus() {
     const values=[...DATA.bonusValues];
@@ -222,7 +254,6 @@
     const button=$("bonus-board").children[index],value=b.values[index];
     b.picks.push(index);button.classList.add("revealed");button.disabled=true;
     if(value===0){
-      playSound("pay");
       const multiplier=b.picks.length===1 ? b.values.reduce((s,n)=>s+n,0) : b.picks.reduce((s,i)=>s+b.values[i],0);
       const award=multiplier*b.bet;
       state.balance+=award*b.denomination;state.lastWin+=award;state.bonus=null;save();
@@ -231,7 +262,7 @@
       $("bonus-message").textContent=`Bonus pays ${award} credits${b.picks.length===1 ? " · First-pick COLLECT awards the whole board!" : ""}`;
       $("bonus-done").hidden=false;
       // Keep wagering locked until the player leaves the result screen.
-      $("bank").textContent=money(state.balance);$("credits").textContent=Math.floor(state.balance/state.denomination).toLocaleString();$("win").textContent=state.lastWin.toLocaleString();
+      countPayout(award,()=>{});
     }else{
       playSound("snowflake");
       button.textContent=`+${value*b.bet}`;
@@ -251,6 +282,7 @@
   $("sound").addEventListener("click",()=>{
     state.sound=!state.sound;save();
     if(!state.sound)stopAllSounds();
+    else if(payout)playSound("pay",true);
     else if(spinning)playSound("spin",true);
     else playSound("click");
     $("sound").textContent=state.sound ? "Sound: on" : "Sound: off";
@@ -261,7 +293,7 @@
   $("lines-down").addEventListener("click",()=>change(()=>state.lines--));
   $("bet-up").addEventListener("click",()=>change(()=>state.bet++));
   $("bet-down").addEventListener("click",()=>change(()=>state.bet--));
-  $("max").addEventListener("click",()=>{if(spinning||state.bonus)return;change(()=>{state.lines=9;state.bet=5;});spin();});
+  $("max").addEventListener("click",()=>{if(spinning||payout||state.bonus||!$("bonus").hidden)return;change(()=>{state.lines=9;state.bet=5;});spin();});
   $("paytable").addEventListener("click",paytable);
   $("cash").addEventListener("click",()=>modal("Cash out",`<p>You have <strong>${Math.floor(state.balance/state.denomination).toLocaleString()} credits</strong> at ${denominationLabel(state.denomination)} per credit.</p><p>Total simulated balance: <strong>${money(state.balance)}</strong>.</p><p>These are play credits. No money is paid out; your balance stays available for play.</p>`));
   $("help").addEventListener("click",()=>modal("How to play",'<p>Use LINES +/− to choose 1–9 paylines, and BET +/− for 1–5 credits per line. Click the numbered lamps to select that many lines. Hover over a lamp to see its path.</p><p>SPIN or Space starts a spin. STOP reveals the result immediately. BET MAX selects nine lines and five credits per line, then spins.</p><p>Click the coin beside CREDITS to change denomination. Your cash balance is preserved. BANK shows simulated cash; CREDITS shows whole credits at the current denomination. Any remainder stays in your balance.</p><p>PAY TABLE shows the recovered awards. Three reels with snowflakes open the bonus. Pick until COLLECT. New game restores 1,000 credits at your current denomination.</p><p>This is a standalone personal recreation using original art and recovered tables. Timing and random selection are newly written. It uses play credits only.</p>'));
@@ -275,7 +307,7 @@
     modal("New game",`<p>Replace your current balance with 1,000 credits (${money(state.denomination*1000)}) at this denomination?</p><button class="primary" id="confirm-new">Start new game</button>`);
     $("confirm-new").addEventListener("click",()=>{change(()=>{state.balance=1000*state.denomination;state.lastWin=0;state.grid=rollGrid();});drawGrid(state.grid);$("dialog").close();});
   });
-  $("bonus-done").addEventListener("click",()=>{$("bonus").hidden=true;update();if(wins.length)startWinCycle();else $("message").textContent=`Game pays ${state.lastWin} credits · Ready to spin`;});
+  $("bonus-done").addEventListener("click",()=>{if(payout)return;$("bonus").hidden=true;update();if(wins.length)startWinCycle();else $("message").textContent=`Game pays ${state.lastWin} credits · Ready to spin`;});
   $("close-dialog").addEventListener("click",()=>$("dialog").close());
   document.addEventListener("keydown",event=>{if(event.code==="Space"&&!event.repeat&&!$("dialog").open&&$("bonus").hidden&&!["BUTTON","INPUT","SELECT","TEXTAREA"].includes(document.activeElement.tagName)){event.preventDefault();spin();}});
   load();createReels();if(!state.grid)state.grid=rollGrid();drawGrid(state.grid);update();

@@ -18,6 +18,12 @@ installer, server, account, or build step. Keep this folder and its assets toget
   amounts smaller than a whole credit. Wagers and awards use integer cents.
 - BANK displays simulated cash; CREDITS displays whole available credits.
   WIN and the pay table use credits. The initial balance is 1,000 credits at 5¢.
+- Reel and bonus payouts count into WIN and CREDITS one credit at a time, with
+  BANK increasing by the denomination each step. The payout sound loops until
+  the last credit is displayed. Wagering stays locked during the count; a pending
+  snowflake bonus opens after its base-game payout finishes. Muting does not
+  interrupt the count. Hiding the tab pauses the count and sound until you return.
+  The full award is saved before counting, so reloading retains the entire win.
 - PAY TABLE lists the recovered payouts and bonus rules. Winning lines cycle
   automatically after a spin.
 - CASH OUT displays the simulated balance. It does not pay money or remove
