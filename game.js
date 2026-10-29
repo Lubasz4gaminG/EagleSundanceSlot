@@ -4,10 +4,23 @@
   const DATA = WOLF_DATA;
   const KEY = "siberian-wolf.v1";
   const LEADERBOARD_URL = "https://siberian-wolf-leaderboard.lubaszj.workers.dev";
+  const musicTracks = [
+    "Sacred Spirit - 01. Intro And Prelude (How The West Was.oga",
+    "Sacred Spirit - 02. Tor-Cheney-Nahana (Winter Ceremony).oga",
+    "Sacred Spirit - 03. Ly-O-Lay Ale Loya (The Counterclock.oga",
+    "Sacred Spirit - 04. Ya-Na-Hana (Celebrate Wild Rice).oga",
+    "Sacred Spirit - 05. Dawa (The Cradlesong).oga",
+    "Sacred Spirit - 06. Gitchi-Manidoo (Advice For The Youn.oga",
+    "Sacred Spirit - 07. Yeha Noha (Wishes Of Happiness And .oga",
+    "Sacred Spirit - 08. Ta-Was-Ne (Elevation).oga",
+    "Sacred Spirit - 09. Heya-Hee (Intertribal Song To Stop .oga",
+    "Sacred Spirit - 10. Shamanic Chant No 5 (Heal The Soul).oga",
+    "Sacred Spirit - 11. Yo-Hey-O-Hee (Brandishing The Tomah.oga"
+  ];
   const names = ["Diamond", "Howling wolf", "White Cougar", "White wolf", "Paw print", "Crane", "Moon", "Snowflake"];
   const lampY = [358.5,234.5,478.5,145.5,570.5,188.5,524,313,402.5];
   const controls = ["lines-up","lines-down","bet-up","bet-down","max","cash","denomination","new-game"];
-  let state = {balance:5000, denomination:5, lines:9, bet:1, lastWin:0, grid:null, bonus:null, sound:true, score:null};
+  let state = {balance:5000, denomination:5, lines:9, bet:1, lastWin:0, grid:null, bonus:null, sound:true, musicVolume:0.25, slotVolume:1, score:null};
   let spinning = false, timers = [], animation = null, lineTimer = null, wins = [], lineIndex = 0;
   let payout = null, payoutTimer = null;
   let leaderboardBusy=false, leaderboardRevision=0;
@@ -18,14 +31,18 @@
     clip.volume = name === "spin" ? 0.35 : 0.55;
     return [name,clip];
   }));
-  let payContext=null, payBuffer=null, stopBuffer=null, payGain=null, paySource=null;
+  const music=new Audio();
+  music.preload="none";
+  let musicIndex=0, mixedStreams=false;
+  let payContext=null, payBuffer=null, stopBuffer=null, payGain=null, paySource=null, slotGain=null, musicGain=null;
   const stopSources=new Set();
   try {
     const BufferedAudio=window.AudioContext || window.webkitAudioContext;
     if(BufferedAudio){
       payContext=new BufferedAudio();
+      slotGain=payContext.createGain();slotGain.connect(payContext.destination);
       payGain=payContext.createGain();payGain.gain.value=sounds.pay.volume;
-      payGain.connect(payContext.destination);
+      payGain.connect(slotGain);
       function pcmBuffer(encoded) {
         const bytes=Uint8Array.from(atob(encoded),c=>c.charCodeAt(0));
         const samples=new DataView(bytes.buffer),frames=bytes.length/4;
@@ -38,12 +55,52 @@
       }
       payBuffer=pcmBuffer(WOLF_PAY_AUDIO);
       stopBuffer=pcmBuffer(WOLF_STOP_AUDIO);
+      // Stream through gain controls on the web; local files retain native playback.
+      if(location.protocol!=="file:"){
+        for(const clip of Object.values(sounds)){
+          const level=payContext.createGain();level.gain.value=clip.volume;
+          payContext.createMediaElementSource(clip).connect(level);level.connect(slotGain);
+          clip.volume=1;
+        }
+        musicGain=payContext.createGain();musicGain.connect(payContext.destination);
+        payContext.createMediaElementSource(music).connect(musicGain);
+        mixedStreams=true;
+      }
     }
   } catch (_) { /* Keep the original audio player if buffered playback is unavailable. */ }
 
   function unlockAudio() {
     audioUnlocked=true;
     if(payContext && payContext.state!=="running" && payContext.state!=="closed")payContext.resume().catch(()=>{});
+    syncMusic();
+  }
+
+  function syncMusic() {
+    if(!audioUnlocked || !state.sound || document.hidden || state.musicVolume===0){music.pause();return;}
+    if(!music.getAttribute("src"))music.src="bkg_music/"+encodeURIComponent(musicTracks[musicIndex]);
+    if(music.paused){
+      const playing=music.play();
+      if(playing)playing.catch(()=>{}); // A later tap can retry playback restrictions.
+    }
+  }
+  music.addEventListener("ended",()=>{
+    musicIndex=(musicIndex+1)%musicTracks.length;
+    music.src="bkg_music/"+encodeURIComponent(musicTracks[musicIndex]);
+    syncMusic();
+  });
+
+  function applyVolumes() {
+    if(slotGain)slotGain.gain.value=state.slotVolume;
+    if(musicGain)musicGain.gain.value=state.musicVolume;
+    for(const [name,clip] of Object.entries(sounds)){
+      clip.volume=mixedStreams ? 1 : (name==="spin" ? 0.35 : 0.55)*state.slotVolume;
+    }
+    music.volume=mixedStreams ? 1 : state.musicVolume;
+    for(const [name,value] of [["music",state.musicVolume],["slot",state.slotVolume]]){
+      $(name+"-volume").value=String(Math.round(value*100));
+      $(name+"-level").textContent=Math.round(value*100)+"%";
+    }
+    syncMusic();
   }
 
   function playSound(name, loop=false) {
@@ -73,15 +130,18 @@
     const clip = sounds[name];
     clip.pause(); clip.currentTime = 0; clip.loop = false;
   }
-  function stopAllSounds() { Object.keys(sounds).forEach(stopSound); }
+  function stopAllSounds() { Object.keys(sounds).forEach(stopSound);music.pause(); }
   document.addEventListener("pointerdown",unlockAudio,{capture:true});
   document.addEventListener("touchend",unlockAudio,{capture:true,passive:true});
   document.addEventListener("click",unlockAudio,{capture:true});
   document.addEventListener("keydown",unlockAudio,{capture:true});
   document.addEventListener("visibilitychange",()=>{
     if(document.hidden)stopAllSounds();
-    else if(payout)playSound("pay",true);
-    else if(spinning)playSound("spin",true);
+    else {
+      if(payout)playSound("pay",true);
+      else if(spinning)playSound("spin",true);
+      syncMusic();
+    }
   });
   document.addEventListener("click",event=>{
     const button=event.target.closest("button");
@@ -196,7 +256,9 @@
         Array.isArray(col) && col.length === 3 && col.every(n => Number.isInteger(n) && n >= 0 && n <= 7));
       state = {...state, balance:s.balance, denomination:s.denomination, lines:s.lines, bet:s.bet,
         lastWin:Number.isSafeInteger(s.lastWin) && s.lastWin >= 0 ? s.lastWin : 0, grid:validGrid ? s.grid : null,
-        sound:typeof s.sound === "boolean" ? s.sound : true};
+        sound:typeof s.sound === "boolean" ? s.sound : true,
+        musicVolume:Number.isFinite(s.musicVolume) && s.musicVolume>=0 && s.musicVolume<=1 ? s.musicVolume : 0.25,
+        slotVolume:Number.isFinite(s.slotVolume) && s.slotVolume>=0 && s.slotVolume<=1 ? s.slotVolume : 1};
       if(s.score && typeof s.score.id==="string" &&
           /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(s.score.id) &&
           Number.isSafeInteger(s.score.cents) && s.score.cents>=0 && s.score.cents<=1801350000 &&
@@ -407,10 +469,17 @@
     else if(payout)playSound("pay",true);
     else if(spinning)playSound("spin",true);
     else playSound("click");
+    syncMusic();
     $("sound").textContent=state.sound ? "Sound: on" : "Sound: off";
     $("sound").setAttribute("aria-pressed",String(state.sound));
   });
   $("spin").addEventListener("click",spin);
+  for(const name of ["music","slot"]){
+    $(name+"-volume").addEventListener("input",()=>{
+      state[name+"Volume"]=Number($(name+"-volume").value)/100;
+      applyVolumes();save();
+    });
+  }
   $("lines-up").addEventListener("click",()=>change(()=>state.lines++));
   $("lines-down").addEventListener("click",()=>change(()=>state.lines--));
   $("bet-up").addEventListener("click",()=>change(()=>state.bet++));
@@ -459,7 +528,7 @@
   $("score-dialog").addEventListener("cancel",event=>{event.preventDefault();skipHighScore();});
   $("score-dialog").addEventListener("close",update);
   document.addEventListener("keydown",event=>{if(event.code==="Space"&&!event.repeat&&!$("dialog").open&&!$("score-dialog").open&&$("bonus").hidden&&!["BUTTON","INPUT","SELECT","TEXTAREA"].includes(document.activeElement.tagName)){event.preventDefault();spin();}});
-  load();createReels();if(!state.grid)state.grid=rollGrid();drawGrid(state.grid);update();
+  load();applyVolumes();createReels();if(!state.grid)state.grid=rollGrid();drawGrid(state.grid);update();
   if(state.bonus)showBonus();save();
   renderLeaderboard([]);
   if(state.score && !state.bonus)checkHighScore();else refreshLeaderboard();

@@ -11,6 +11,11 @@
 /* Keep cabinet text proportional when viewport height limits the game width. */
 @supports(width:1cqw){main{container-type:inline-size}output{font-size:clamp(8px,2cqw,27px)}#bonus-message{font-size:clamp(8px,1.5cqw,21px)}#bonus-board button{font-size:clamp(9px,1.6cqw,22px)}#bonus-done{font-size:clamp(8px,1.4cqw,19px)}}
 
+.audio-levels{display:flex;flex-wrap:wrap;justify-content:center;gap:12px 24px;padding:14px 16px 0;color:#c5d6e0;font-size:12px}
+.audio-levels label{display:grid;grid-template-columns:105px 110px 4ch;align-items:center;gap:8px}
+.audio-levels input{width:110px;min-width:0;accent-color:#83c9dd;cursor:pointer}
+.audio-levels label>span:last-child{text-align:right;font-variant-numeric:tabular-nums}
+
 /* Fit the playable cabinet crop to the mobile viewport on first load. */
 @media(pointer:coarse) and (max-width:1024px){
   body{display:block;padding-top:0}

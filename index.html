@@ -50,6 +50,10 @@
     <ol id="leaderboard-scores" aria-label="Highest dollar payouts"></ol>
     <p id="leaderboard-status" role="status" aria-live="polite">Loading shared scores…</p>
   </section>
+  <div class="audio-levels">
+    <label for="music-volume"><span>Background music</span><input id="music-volume" type="range" min="0" max="100" step="1" value="25" aria-label="Background music volume"><span id="music-level" aria-hidden="true">25%</span></label>
+    <label for="slot-volume"><span>Slot machine</span><input id="slot-volume" type="range" min="0" max="100" step="1" value="100" aria-label="Slot machine volume"><span id="slot-level" aria-hidden="true">100%</span></label>
+  </div>
   <footer><span>Play credits only</span><button id="sound" aria-pressed="true">Sound: on</button><button id="help">How to play</button><button id="new-game">New game</button><span>Space to spin</span></footer>
 </main>
 <dialog id="dialog"><div class="dialog-top"><h2 id="dialog-title"></h2><button id="close-dialog" aria-label="Close">×</button></div><div id="dialog-body"></div></dialog>
